@@ -1,5 +1,7 @@
 <h1>Register</h1>
-<%= message %>
+<% if (messages.error) { %>
+    <%= messages.error %>
+<% } %>
 <form action="/register", method="POST">
     <div>
         <label for="name">Name</label>

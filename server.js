@@ -19,7 +19,7 @@ initializePassport(
     );
 
 
-app.set('view-engine', 'ejs');                      // Bunch of settings for express js
+app.set('view-engine', 'ejs');                  // Bunch of settings for express js
 app.use(express.urlencoded({extended: false})); // Use JSON for url parsing
 app.use(flash());
 app.use(session({
@@ -46,24 +46,32 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
 }))
 
 app.get('/register', checkNotAuthenticated, (req,res) => {
-    res.render('register.ejs', {message: ''});
+    res.render('register.ejs');
 })
 
 app.post('/register', checkNotAuthenticated, async (req,res) => {
     try
     {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        users.push({
-            id: Date.now().toString(), 
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword
-        })
-        res.redirect('/login');
+        if (users.find(user => user.email === req.body.email))
+        {
+            req.flash('error','There is already an account with that email.');
+            res.redirect('/register');
+        }
+        else
+        {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+            users.push({
+                id: Date.now().toString(), 
+                name: req.body.name,
+                email: req.body.email,
+                password: hashedPassword
+            })
+            res.redirect('/login');
+        }
     }
     catch
     {
-        res.redirect('/register', {message: ''});
+        res.redirect('/register');
     }
     console.log(users);
 })
@@ -77,14 +85,6 @@ app.delete('/logout', (req,res) =>{
     })
     res.redirect('/login');
 });
-
-app.get('/verifier', (req,res) => {
-    if (req.isAuthenticated())
-    {
-        return res.render('profile.ejs', {name: req.user.name});
-    }
-    res.render('notloggedin.ejs');
-})
 
 function checkAuthenticated(req, res, next)
 {
