@@ -1,4 +1,17 @@
 <h1>Hi, <%= name %></h1>
-<form action="/logout?_method=DELETE", method="POST">
+<a href="/cart"><button type="button">Cart</button></a>
+<form action="/logout", method="POST">
     <button type="submit">Log Out</button>
 </form>
+<iframe name="dummyFrame" width=0 height="0" border="0" style="display: none;"></iframe>
+
+
+<% for (var i = 0; i < products.length; i++) { %>
+    <form action="/cart" method="post" target="dummyFrame">
+        <input type="hidden" name="productid" value="<%= products[i].id %>">
+        <label for="submit"><%= products[i].name %></label>
+        <input type="submit" id="submit" value="Add to Cart">
+        <input type="number" id="quantity" name="quantity" min="1" max="20" value="1">
+    </form>
+    <br>
+<% } %>

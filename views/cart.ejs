@@ -1,0 +1,5 @@
+<h1>Cart</h1>
+<a href="/"><button>Home</button></a>
+<% for (var i = 0; i < cart.length; i++) { %>
+    <p><%= cart[i].quantity %> <%= cart[i].name %></p>
+<% } %>

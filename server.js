@@ -4,12 +4,15 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
-const methodOverride = require('method-override');
 const dotenv = require('dotenv');                       // Sets up all dependencies
 
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
-const users = [];
+const users = [{id: Date.now().toString(), 
+    name: 'a',
+    email: 'a',
+    password: '$2b$10$XgY79Fj/aju5G1rlfI6.EOkWsmvd3Ci5EE61EPxADkeRiVQQHZarm',
+    cart: []}];
 
 const initializePassport = require('./passport-config');
 initializePassport(
@@ -18,6 +21,17 @@ initializePassport(
     (id) => users.find(user => user.id === id)
     );
 
+
+const products = [];
+
+const createProduct = (name, id, weight, price) => {
+    products.push({
+        name, id, weight, price
+    });
+};
+createProduct("Apple", 1, 10, 3);
+createProduct("Orange", 2, 15, 4);
+createProduct("Banana", 3, 30, 8);
 
 app.set('view-engine', 'ejs');                  // Bunch of settings for express js
 app.use(express.urlencoded({extended: false})); // Use JSON for url parsing
@@ -29,10 +43,9 @@ app.use(session({
 }))
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(methodOverride('_method'));
 
 app.get('/', checkAuthenticated, (req,res) => {
-    res.render('index.ejs', {name: req.user.name});
+    res.render('index.ejs', {name: req.user.name, cart: req.user.cart, products});
 })
 
 app.get('/login', checkNotAuthenticated, (req,res) => {
@@ -64,7 +77,8 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
                 id: Date.now().toString(), 
                 name: req.body.name,
                 email: req.body.email,
-                password: hashedPassword
+                password: hashedPassword,
+                cart: []
             })
             res.redirect('/login');
         }
@@ -76,7 +90,10 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
     console.log(users);
 })
 
-app.delete('/logout', (req,res) =>{
+app.get('/logout', (req, res) => {
+    res.redirect('/');
+})
+app.post('/logout', checkAuthenticated, (req,res) =>{
     req.logout((err) => {
         if (err)
         {
@@ -85,6 +102,36 @@ app.delete('/logout', (req,res) =>{
     })
     res.redirect('/login');
 });
+
+app.get('/cart', checkAuthenticated, (req, res) => {
+    let userCart = [];
+    for (var i = 0; i < req.user.cart.length; i++)
+    {
+        let dbProduct = products.find(product => product.id == req.user.cart[i].id);
+        userCart.push({name: dbProduct.name, quantity: req.user.cart[i].quantity});
+    }
+    res.render('cart.ejs', {cart: userCart});
+})
+
+app.post('/cart', checkAuthenticated, (req, res) => {
+    if (req.body.productid)
+    {
+        var cartItem = req.user.cart.find(product => product.id === req.body.productid);
+        if (cartItem) // Check if the item is already in the user's cart. If so update with the new quantity. If not, add it
+        {
+            cartItem.quantity = req.body.quantity;
+        }
+        else
+        {
+            req.user.cart.push({id: req.body.productid, quantity: req.body.quantity});
+        }
+    }
+    else
+    {
+        res.redirect('/error');
+    }
+    console.log(req.user.cart);
+})
 
 function checkAuthenticated(req, res, next)
 {
@@ -106,7 +153,4 @@ function checkNotAuthenticated(req, res, next)
     next();
 }
 
-
-
 app.listen(3000);
-
