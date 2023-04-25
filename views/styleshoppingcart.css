@@ -1,0 +1,45 @@
+body
+{
+    margin: 0;
+    padding: 0;
+    background-image:url("blue-background.jpg");
+    font-family: 'Arial';
+}
+
+.cart-page{margin: 50px auto;}
+
+h1{
+  text-align: center;}
+
+table{
+    width: 40%;
+    border-collapse: collapse;}
+
+.cart-info{
+    display: flex;
+    flex-wrap: wrap;}
+th{
+  text-align: left;
+  padding: 5px;
+  color: #fff;
+  background: #ff523b;
+  font-weight: normal;}
+
+  td{
+  padding: 10px 5px;}
+
+  td input{
+  width: 40px;
+  height: 30px;
+  padding: 5px;}
+
+  td a{
+    color: #ff523b;
+    font-size: 12px;
+  }
+
+td img{
+    width: 80px;
+    height: 80px;
+    padding: 10px;
+  }
