@@ -5,21 +5,25 @@ const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
 const dotenv = require('dotenv');                       // Sets up all dependencies
+const mysql = require('mysql');
+const cookieParser = require('cookie-parser');
 
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
-const users = [{id: Date.now().toString(), 
-    name: 'a',
-    email: 'a',
-    password: '$2b$10$XgY79Fj/aju5G1rlfI6.EOkWsmvd3Ci5EE61EPxADkeRiVQQHZarm',
-    cart: []}];
+const connection = mysql.createConnection({
+    host: 'cmpe131-group4-baymart.ceuvuwmxdxqi.us-west-1.rds.amazonaws.com',
+    user: 'admin',
+    password: 'password',
+    database: 'cmpe131_group4_baymart'
+});
+
+connection.connect(function(err) {
+    if (err) throw err;
+    console.log('Connected!');
+});
 
 const initializePassport = require('./passport-config');
-initializePassport(
-    passport, 
-    (email) => users.find(user => user.email === email),
-    (id) => users.find(user => user.id === id)
-    );
+initializePassport(passport, connection);
 
 
 const products = [];
@@ -43,9 +47,15 @@ app.use(session({
 }))
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cookieParser());
 
 app.get('/', checkAuthenticated, (req,res) => {
-    res.render('index.ejs', {name: req.user.name, cart: req.user.cart, products});
+    if (!req.cookies.cart)
+    {
+        res.cookie('cart', JSON.stringify([]));
+        console.log(req.cookies.cart);
+    }
+    res.render('index.ejs', {name: req.user.firstname, cart: req.user.cart, products});
 })
 
 app.get('/login', checkNotAuthenticated, (req,res) => {
@@ -56,38 +66,33 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
-}))
+}));
 
 app.get('/register', checkNotAuthenticated, (req,res) => {
     res.render('register.ejs');
 })
 
 app.post('/register', checkNotAuthenticated, async (req,res) => {
-    try
-    {
-        if (users.find(user => user.email === req.body.email))
+    connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], function(error, results) {
+        if (results.length > 0)
         {
             req.flash('error','There is already an account with that email.');
             res.redirect('/register');
         }
-        else
-        {
-            const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            users.push({
-                id: Date.now().toString(), 
-                name: req.body.name,
-                email: req.body.email,
-                password: hashedPassword,
-                cart: []
-            })
-            res.redirect('/login');
-        }
-    }
-    catch
+    });
+
+    try
     {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[1, req.body.email, hashedPassword,
+        req.body.firstname, req.body.lastname, req.body.mobilenum]);
+        res.redirect('/login');
+    }
+    catch(e)
+    {
+        console.log(e);
         res.redirect('/register');
     }
-    console.log(users);
 })
 
 app.get('/logout', (req, res) => {
@@ -100,37 +105,45 @@ app.post('/logout', checkAuthenticated, (req,res) =>{
             return next(err);
         }
     })
+    res.clearCookie('cart');
     res.redirect('/login');
 });
 
 app.get('/cart', checkAuthenticated, (req, res) => {
-    let userCart = [];
-    for (var i = 0; i < req.user.cart.length; i++)
+    let productList = [];
+    userCart = JSON.parse(req.cookies.cart);
+    for (var i = 0; i < userCart.length; i++)
     {
-        let dbProduct = products.find(product => product.id == req.user.cart[i].id);
-        userCart.push({name: dbProduct.name, quantity: req.user.cart[i].quantity});
+        let dbProduct = products.find(product => product.id == userCart[i].id);
+        productList.push({name: dbProduct.name, quantity: userCart[i].quantity});
     }
-    res.render('cart.ejs', {cart: userCart});
+    res.render('cart.ejs', {cart: productList});
 })
 
 app.post('/cart', checkAuthenticated, (req, res) => {
+    if (!req.cookies.cart) res.redirect('/');
+
     if (req.body.productid)
     {
-        var cartItem = req.user.cart.find(product => product.id === req.body.productid);
+        userCart = JSON.parse(req.cookies.cart);
+        var cartItem = userCart.find(product => product.id === req.body.productid);
         if (cartItem) // Check if the item is already in the user's cart. If so update with the new quantity. If not, add it
         {
             cartItem.quantity = req.body.quantity;
         }
         else
         {
-            req.user.cart.push({id: req.body.productid, quantity: req.body.quantity});
+            userCart.push({id: req.body.productid, quantity: req.body.quantity});
+            console.log(userCart);
         }
+        res.clearCookie('cart');
+        res.cookie('cart',JSON.stringify(userCart));
+        res.redirect('/');
     }
     else
     {
         res.redirect('/error');
     }
-    console.log(req.user.cart);
 })
 
 function checkAuthenticated(req, res, next)

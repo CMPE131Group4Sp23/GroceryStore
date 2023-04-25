@@ -1,35 +1,45 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 
-function initialize(passport, getUserByEmail, getUserById)
+function initialize(passport, connection)
 {
     const authenticateUser = async (email, password, done) => {
-        const user = getUserByEmail(email);
-        if (user == null)
-        {
-            return done(null, false, { message: 'No user with that email' });
-        }
+        connection.query('SELECT * FROM users WHERE email = ?',[email], async function(error, results, fields) {
+            try {
+                if (error) return done(error);
 
-        try
-        {
-            if (await bcrypt.compare(password, user.password))
-            {
-                return done(null, user);
+                if (results.length == 0)
+                {
+                    return done(null, false, { message: 'No user with that email' });
+                }
+
+                user = results[0];
+                if (await bcrypt.compare(password, user.password))
+                {
+                    return done(null, user);
+                }
+                else
+                {
+                    return done(null, false, { message: 'Password incorrect'});
+                }
             }
-            else
+            catch(e)
             {
-                return done(null, false, { message: 'Password incorrect'});
+                return done(e);
             }
-        }
-        catch(e)
-        {
-            return done(e);
-        }
+        })
+        
     }
     passport.use(new LocalStrategy({ usernameField: 'email' }, authenticateUser));
-    passport.serializeUser((user,done) => done(null, user.id));
+    passport.serializeUser((user,done) => 
+    {
+        done(null, user.userid);
+    });
     passport.deserializeUser((id, done) => {
-        done(null, getUserById(id));
+        connection.query('SELECT * FROM users WHERE userid = ?', [id], function(error, results) {
+            if (results.length == 0) done(error);
+            done(null, results[0]);
+        });
     });
 }
 

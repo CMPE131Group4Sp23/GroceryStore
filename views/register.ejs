@@ -4,8 +4,11 @@
 <% } %>
 <form action="/register", method="POST">
     <div>
-        <label for="name">Name</label>
-        <input type="text" id="name", name="name" required>
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname", name="firstname" required>
+
+        <label for="lastname">Last Name</label>
+        <input type="text" id="lastname", name="lastname" required>
     </div>
     <div>
         <label for="email">Email</label>
@@ -14,6 +17,10 @@
     <div>
         <label for="password">Password</label>
         <input type="password" id="password", name="password" required>
+    </div>
+    <div>
+        <label for="mobilenum">Mobile Number</label>
+        <input type="text" id="mobilenum", name="mobilenum" required>
     </div>
     <button type="submit">Register</button>
 </form>
