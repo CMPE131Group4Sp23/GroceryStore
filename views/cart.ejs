@@ -1,5 +1,11 @@
 <h1>Cart</h1>
 <a href="/"><button>Home</button></a>
+<form action="/cart/clear" method="POST"><button type="submit">Clear cart</button></form>
 <% for (var i = 0; i < cart.length; i++) { %>
-    <p><%= cart[i].quantity %> <%= cart[i].name %></p>
+    <%= cart[i].name %>: <%= cart[i].quantity %> 
+    <br>
 <% } %>
+<br>
+Total Weight: <%= weight %>
+<br>
+Total Price: <%= price %>

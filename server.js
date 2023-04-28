@@ -9,7 +9,7 @@ const dotenv = require('dotenv');                       // Sets up all dependenc
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
 const users = [{id: Date.now().toString(), 
-    name: 'a',
+    name: 'Caden',
     email: 'a',
     password: '$2b$10$XgY79Fj/aju5G1rlfI6.EOkWsmvd3Ci5EE61EPxADkeRiVQQHZarm',
     cart: []}];
@@ -35,6 +35,8 @@ createProduct("Banana", 3, 30, 8);
 
 app.set('view-engine', 'ejs');                  // Bunch of settings for express js
 app.use(express.urlencoded({extended: false})); // Use JSON for url parsing
+app.use(express.static('styles'));
+app.use(express.static('files'));
 app.use(flash());
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -45,18 +47,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', checkAuthenticated, (req,res) => {
-    res.render('index.ejs', {name: req.user.name, cart: req.user.cart, products});
+    res.render('index.ejs', {name: req.user.name, products});
 })
 
 app.get('/login', checkNotAuthenticated, (req,res) => {
-    res.render('login.ejs');
+    res.render('login2.ejs');
 })
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
-}))
+}));
 
 app.get('/register', checkNotAuthenticated, (req,res) => {
     res.render('register.ejs');
@@ -103,14 +105,27 @@ app.post('/logout', checkAuthenticated, (req,res) =>{
     res.redirect('/login');
 });
 
+app.post('/cart/clear', checkAuthenticated, (req, res) => {
+    req.user.cart = [];
+    users.find(user => user.id == req.user.id).cart = [];
+    res.redirect('/cart');
+})
+
 app.get('/cart', checkAuthenticated, (req, res) => {
     let userCart = [];
+    let totalWeight = 0;
+    let totalPrice = 0;
     for (var i = 0; i < req.user.cart.length; i++)
     {
         let dbProduct = products.find(product => product.id == req.user.cart[i].id);
-        userCart.push({name: dbProduct.name, quantity: req.user.cart[i].quantity});
+        if (dbProduct)
+        {
+            userCart.push({name: dbProduct.name, quantity: req.user.cart[i].quantity});
+            totalWeight += dbProduct.weight * req.user.cart[i].quantity;
+            totalPrice += dbProduct.price * req.user.cart[i].quantity;
+        }
     }
-    res.render('cart.ejs', {cart: userCart});
+    res.render('cart.ejs', {cart: userCart, weight: totalWeight, price: totalPrice});
 })
 
 app.post('/cart', checkAuthenticated, (req, res) => {
@@ -130,7 +145,6 @@ app.post('/cart', checkAuthenticated, (req, res) => {
     {
         res.redirect('/error');
     }
-    console.log(req.user.cart);
 })
 
 function checkAuthenticated(req, res, next)
