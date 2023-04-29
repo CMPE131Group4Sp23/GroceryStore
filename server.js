@@ -19,7 +19,7 @@ const connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    console.log('Connected!');
+    console.log('Connected to Database!');
 });
 
 const initializePassport = require('./passport-config');
@@ -39,14 +39,14 @@ createProduct("Banana", 3, 30, 8);
 
 app.set('view-engine', 'ejs');                  // Bunch of settings for express js
 app.use(express.urlencoded({extended: false})); // Use JSON for url parsing
-app.use(express.static('styles'));
-app.use(express.static('files'));
 app.use(flash());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }))
+app.use(express.static('styles'));
+app.use(express.static('files'));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
@@ -55,13 +55,12 @@ app.get('/', checkAuthenticated, (req,res) => {
     if (!req.cookies.cart)
     {
         res.cookie('cart', JSON.stringify([]));
-        console.log(req.cookies.cart);
     }
     res.render('index.ejs', {name: req.user.firstname, cart: req.user.cart, products});
 })
 
 app.get('/login', checkNotAuthenticated, (req,res) => {
-    res.render('login2.ejs');
+    res.render('login.ejs');
 })
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -76,6 +75,7 @@ app.get('/register', checkNotAuthenticated, (req,res) => {
 
 app.post('/register', checkNotAuthenticated, async (req,res) => {
     connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], function(error, results) {
+        if (error) throw error;
         if (results.length > 0)
         {
             req.flash('error','There is already an account with that email.');
@@ -86,13 +86,12 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
     try
     {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[1, req.body.email, hashedPassword,
+        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[2, req.body.email, hashedPassword,
         req.body.firstname, req.body.lastname, req.body.mobilenum]);
         res.redirect('/login');
     }
     catch(e)
     {
-        console.log(e);
         res.redirect('/register');
     }
 })
@@ -111,21 +110,26 @@ app.post('/logout', checkAuthenticated, (req,res) =>{
     res.redirect('/login');
 });
 
-app.post('/cart/clear', checkAuthenticated, (req, res) => {
-    req.user.cart = [];
-    users.find(user => user.id == req.user.id).cart = [];
-    res.redirect('/cart');
-})
-
 app.get('/cart', checkAuthenticated, (req, res) => {
     let productList = [];
     userCart = JSON.parse(req.cookies.cart);
+    let totalWeight = 0;
+    let totalPrice = 0;
     for (var i = 0; i < userCart.length; i++)
     {
         let dbProduct = products.find(product => product.id == userCart[i].id);
+        if (dbProduct)
+        {
+            totalWeight += dbProduct.weight;
+            totalPrice += dbProduct.price;
+        }
         productList.push({name: dbProduct.name, quantity: userCart[i].quantity});
     }
-    res.render('cart.ejs', {cart: productList});
+    if (productList.length == 0)
+    {
+        req.flash('emptyCart', 'Cart is Empty.');
+    }
+    res.render('cart.ejs', {cart: productList, weight: totalWeight, price: totalPrice});
 })
 
 app.post('/cart', checkAuthenticated, (req, res) => {
@@ -142,7 +146,6 @@ app.post('/cart', checkAuthenticated, (req, res) => {
         else
         {
             userCart.push({id: req.body.productid, quantity: req.body.quantity});
-            console.log(userCart);
         }
         res.clearCookie('cart');
         res.cookie('cart',JSON.stringify(userCart));
@@ -153,6 +156,12 @@ app.post('/cart', checkAuthenticated, (req, res) => {
         res.redirect('/error');
     }
 })
+
+app.post('/cart/clear', (req, res) => {
+    res.clearCookie('cart');
+    res.cookie('cart',JSON.stringify([]));
+    res.redirect('/cart');
+});
 
 function checkAuthenticated(req, res, next)
 {
