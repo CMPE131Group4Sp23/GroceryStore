@@ -19,8 +19,8 @@
         <input type="password" id="password", name="password" required>
     </div>
     <div>
-        <label for="mobilenum">Mobile Number</label>
-        <input type="text" id="mobilenum", name="mobilenum" required>
+        <label for="mobilenum">Mobile Number (Format: 000-000-0000)</label>
+        <input type="tel" id="mobilenum", name="mobilenum" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
     </div>
     <button type="submit">Register</button>
 </form>

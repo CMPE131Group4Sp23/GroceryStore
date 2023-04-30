@@ -8,6 +8,7 @@ const dotenv = require('dotenv');                       // Sets up all dependenc
 const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
+const { v4: uuidv4} = require('uuid');
 
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
@@ -25,18 +26,6 @@ connection.connect(function(err) {
 
 const initializePassport = require('./passport-config');
 initializePassport(passport, connection);
-
-
-const products = [];
-
-const createProduct = (name, id, weight, price) => {
-    products.push({
-        name, id, weight, price
-    });
-};
-createProduct("Apple", 1, 10, 3);
-createProduct("Orange", 2, 15, 4);
-createProduct("Banana", 3, 30, 8);
 
 app.set('view-engine', 'ejs');                  // Bunch of settings for express js
 app.use(express.urlencoded({extended: false})); // Use JSON for url parsing
@@ -92,6 +81,14 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
         res.redirect('/register');
         return;
     }
+    req.body.mobilenum = req.body.mobilenum.replace(/-/g,"");
+
+    if (req.body.mobilenum.length != 10)
+    {
+        req.flash('error', 'Invalid Phone Number');
+        res.redirect('/register');
+        return;
+    }
     connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], function(error, results) {
         if (error) throw error;
         if (results.length > 0)
@@ -105,12 +102,13 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
     try
     {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[generateNewUserKey(), req.body.email, hashedPassword,
+        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[uuidv4(), req.body.email, hashedPassword,
         req.body.firstname, req.body.lastname, req.body.mobilenum]);
         res.redirect('/login');
     }
     catch(e)
     {
+        console.log(e);
         res.redirect('/register');
     }
 })
@@ -153,7 +151,15 @@ app.get('/cart', checkAuthenticated, (req, res) => {
             }
         }
         if (results.length == 0) req.flash('emptyCart', 'Cart is Empty.');
-        res.render('cart.ejs', {cart: productList, weight: totalWeight, price: (totalPrice/100).toFixed(2), editItem: -1});
+        if (totalWeight > 20)
+        {
+            weightFee = 5.00;
+        }
+        else
+        {
+            weightFee = 0;
+        }
+        res.render('cart.ejs', {cart: productList, weight: totalWeight.toFixed(2), price: (totalPrice/100 + weightFee).toFixed(2), editItem: -1, weightFee: weightFee.toFixed(2)});
     });
 })
 
@@ -259,13 +265,5 @@ function checkNotAuthenticated(req, res, next)
     next();
 }
 
-function generateNewUserKey()
-{
-
-    newKey = Math.floor(Math.random() * 100000);
-    let matchingVals = connection.query('SELECT * FROM users WHERE userid = ?',[newKey]);
-    console.log(matchingVals.results.length);
-    if (matchingVals.results.length == 0) return newKey;
-}
 
 app.listen(3000);

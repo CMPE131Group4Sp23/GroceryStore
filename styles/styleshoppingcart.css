@@ -6,6 +6,7 @@ body
     font-family: 'Arial';
 }
 
+
 .cart-page{margin: 50px auto;}
 
 h1{
@@ -48,4 +49,11 @@ td img{
 
 form {
   margin: 0px;
+}
+
+#quantityBox {
+  width: 50px;
+  display: none;
+  border: none;
+  background-color: rgb(235, 235, 235);
 }

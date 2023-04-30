@@ -12,6 +12,7 @@
           <th>Product</th>
           <th>Price</th>
           <th>Quantity</th>
+          <th>Weight</th>
       </tr>
 
 <!--products-->
@@ -37,9 +38,13 @@
               <input type="submit" id="editButton" class="cart-button hideOnEdit" style="margin-left: 15px;" value="Edit" onclick="showQuantityBox(<%= cart[i].Product_ID %>);">
               <form action="/cart/editquantity" method="POST">
                 <input type="hidden" name="id" value="<%= cart[i].Product_ID %>">
-                <input type="number" class="showOnEdit" value="<%= cart[i].quantity %>" name="newquantity" style="width: 50px; display: none;">
+                <input type="number" class="showOnEdit" id="quantityBox" value="<%= cart[i].quantity %>" name="newquantity" min="1" max="20">
                 <input type="submit" value="Save" class="cart-button showOnEdit" style="display: none;">
               </form>
+            </td>
+
+            <td>
+              <p><%= (cart[i].Weight * cart[i].quantity).toFixed(2) %> lb</p>
             </td>
         </tr>
       <% } %>
@@ -54,18 +59,26 @@
 
 <tr>
     <th>Weight fee</th>
-    <th>Total</th>
+    <th>Subtotal</th>
     <th>     </th>
+    <th>Total Weight</th>
 </tr>
 
 <tr>
-    <td>$10.00</td>
-    <td>$<%= price %></td>
+    <td>
+      <p>$<%= weightFee %></p>
+    </td>
+    <td>
+      <p>$<%= price %></p>
+    </td>
     <td>
       <div class="cart-info">
       <img src="shopping-cart.jpg">
       </div>
       <a href="payment.html"> Go to payment!</a>
+    </td>
+    <td>
+      <p><%= weight %> lb</p>
     </td>
 </tr>
 
