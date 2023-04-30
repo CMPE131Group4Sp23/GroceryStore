@@ -7,6 +7,7 @@ const session = require('express-session');
 const dotenv = require('dotenv');                       // Sets up all dependencies
 const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
+const emailValidator = require('email-validator');
 
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
@@ -56,7 +57,18 @@ app.get('/', checkAuthenticated, (req,res) => {
     {
         res.cookie('cart', JSON.stringify([]));
     }
-    res.render('index.ejs', {name: req.user.firstname, cart: req.user.cart, products});
+    let productList = [];
+    connection.query('SELECT * FROM Product', function(error, results) {
+        if (results)
+        {
+            for (i = 0; i < results.length; i++)
+            {
+                if (!productList[Math.floor(i/4)]) productList[Math.floor(i/4)] = [];
+                productList[Math.floor(i/4)].push(results[i]);
+            }
+        }
+        res.render('index.ejs', {name: req.user.firstname, cart: req.user.cart, productList});
+    });
 })
 
 app.get('/login', checkNotAuthenticated, (req,res) => {
@@ -74,19 +86,26 @@ app.get('/register', checkNotAuthenticated, (req,res) => {
 })
 
 app.post('/register', checkNotAuthenticated, async (req,res) => {
+    if (!emailValidator.validate(req.body.email))
+    {
+        req.flash('error', 'Invalid Email Address');
+        res.redirect('/register');
+        return;
+    }
     connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], function(error, results) {
         if (error) throw error;
         if (results.length > 0)
         {
             req.flash('error','There is already an account with that email.');
             res.redirect('/register');
+            return;
         }
     });
 
     try
     {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[2, req.body.email, hashedPassword,
+        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[generateNewUserKey(), req.body.email, hashedPassword,
         req.body.firstname, req.body.lastname, req.body.mobilenum]);
         res.redirect('/login');
     }
@@ -111,28 +130,83 @@ app.post('/logout', checkAuthenticated, (req,res) =>{
 });
 
 app.get('/cart', checkAuthenticated, (req, res) => {
-    let productList = [];
     userCart = JSON.parse(req.cookies.cart);
-    let totalWeight = 0;
-    let totalPrice = 0;
+    let query = "SELECT * FROM Product WHERE Product_ID = 0 ";
     for (var i = 0; i < userCart.length; i++)
     {
-        let dbProduct = products.find(product => product.id == userCart[i].id);
-        if (dbProduct)
+        query = query + "OR Product_ID = " + connection.escape(userCart[i].id) + " ";
+    }
+
+    connection.query(query, function(error, results) {
+        let productList = [];
+        let totalWeight = 0;
+        let totalPrice = 0;
+        if (results)
         {
-            totalWeight += dbProduct.weight;
-            totalPrice += dbProduct.price;
+            for (var i = 0; i < results.length; i++)
+            {
+                cartItem = userCart.find(item => item.id == results[i].Product_ID)
+                totalWeight += results[i].Weight * cartItem.quantity;
+                totalPrice += results[i].Price * cartItem.quantity;
+                productList.push(results[i]);
+                productList[productList.length-1].quantity = cartItem.quantity; // Finds the quantity from the user's cart and applies it to the DB item
+            }
         }
-        productList.push({name: dbProduct.name, quantity: userCart[i].quantity});
-    }
-    if (productList.length == 0)
-    {
-        req.flash('emptyCart', 'Cart is Empty.');
-    }
-    res.render('cart.ejs', {cart: productList, weight: totalWeight, price: totalPrice});
+        if (results.length == 0) req.flash('emptyCart', 'Cart is Empty.');
+        res.render('cart.ejs', {cart: productList, weight: totalWeight, price: (totalPrice/100).toFixed(2), editItem: -1});
+    });
 })
 
 app.post('/cart', checkAuthenticated, (req, res) => {
+    userCart = JSON.parse(req.cookies.cart);
+    let query = "SELECT * FROM Product WHERE Product_ID = 0 ";
+    for (var i = 0; i < userCart.length; i++)
+    {
+        query = query + "OR Product_ID = " + connection.escape(userCart[i].id) + " ";
+    }
+
+    connection.query(query, function(error, results) {
+        let productList = [];
+        let totalWeight = 0;
+        let totalPrice = 0;
+        if (results)
+        {
+            for (var i = 0; i < results.length; i++)
+            {
+                cartItem = userCart.find(item => item.id == results[i].Product_ID)
+                totalWeight += results[i].Weight * cartItem.quantity;
+                totalPrice += results[i].Price * cartItem.quantity;
+                productList.push(results[i]);
+                productList[productList.length-1].quantity = cartItem.quantity; // Finds the quantity from the user's cart and applies it to the DB item
+            }
+        }
+        if (results.length == 0) req.flash('emptyCart', 'Cart is Empty.');
+        res.render('cart.ejs', {cart: productList, weight: totalWeight, price: (totalPrice/100).toFixed(2), editItem: req.body.id});
+    });
+})
+
+app.post('/cart/editquantity', checkAuthenticated, (req, res) => {
+    userCart = JSON.parse(req.cookies.cart);
+    cartItem = userCart.find(product => product.id === req.body.id);
+    if (cartItem)
+    {
+        cartItem.quantity = req.body.newquantity;
+    }
+    res.clearCookie('cart');
+    res.cookie('cart', JSON.stringify(userCart));
+    res.redirect('/cart');
+})
+
+app.post('/cart/removeitem', checkAuthenticated, (req,res) => {
+    userCart = JSON.parse(req.cookies.cart);
+    var index = userCart.findIndex(item => item.id === req.body.id);
+    if (index != -1) userCart.splice(index, 1);
+    res.clearCookie('cart');
+    res.cookie('cart', JSON.stringify(userCart));
+    res.redirect('/cart');
+})
+
+app.post('/cart/additem', checkAuthenticated, (req, res) => {
     if (!req.cookies.cart) res.redirect('/');
 
     if (req.body.productid)
@@ -157,11 +231,13 @@ app.post('/cart', checkAuthenticated, (req, res) => {
     }
 })
 
-app.post('/cart/clear', (req, res) => {
+app.post('/cart/clear', checkAuthenticated, (req, res) => {
     res.clearCookie('cart');
     res.cookie('cart',JSON.stringify([]));
     res.redirect('/cart');
 });
+
+
 
 function checkAuthenticated(req, res, next)
 {
@@ -181,6 +257,15 @@ function checkNotAuthenticated(req, res, next)
     }
 
     next();
+}
+
+function generateNewUserKey()
+{
+
+    newKey = Math.floor(Math.random() * 100000);
+    let matchingVals = connection.query('SELECT * FROM users WHERE userid = ?',[newKey]);
+    console.log(matchingVals.results.length);
+    if (matchingVals.results.length == 0) return newKey;
 }
 
 app.listen(3000);

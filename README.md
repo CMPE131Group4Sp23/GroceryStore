@@ -13,7 +13,7 @@ Click the dots again, and click Checkout To, then select this branch
 
 All of the files should be in your project folder now.
 
-Open up a terminal window within VSCode, and paste in "npm install express, bcrypt, passport, express-flash, express-session, dotenv, mysql, cookie-parser"
+Open up a terminal window within VSCode, and paste in "npm install express, bcrypt, passport, express-flash, express-session, dotenv, mysql, cookie-parser, email-validator"
 
 Type "npm run devStart" to start the local server
 

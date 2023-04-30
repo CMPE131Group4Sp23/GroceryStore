@@ -7,27 +7,26 @@
 <body>
     <h1>BayMart Customer Log in</h1><br>
     <div class="login">
-    <% if (messages.error) { %>
-        <p style="color:red"><%= messages.error %></p>
-    <% } %>
-    <form id="login" method="POST" action="/login">
-        <label><b>User Name
-        </b>
-        </label>
-        <input type="text" name="email" id="Uname" placeholder="Username">
-        <br><br>
-        <label><b>Password
-        </b>
-        </label>
-        <input type="Password" name="password" id="Pass" placeholder="Password">
-        <br><br>
-        <input type="submit" name="log" id="log" value="Log In Here">
-        <br><br>
-        <input type="checkbox" id="check">
-        <span>Remember me</span>
-        <br><br>
-        <a href="#">Forgot Password</a>
-    </form>
-</div>
+        <% if (messages.error) { %>
+            <p style="color:red"><%= messages.error %></p>
+        <% } %>
+        <form id="login" method="POST" action="/login" style="margin-left: 30px">
+            <label><b>User Name
+            </b>
+            </label>
+            <input type="text" name="email" id="Uname" placeholder="Username">
+            <br><br>
+            <label><b>Password
+            </b>
+            </label>
+            <input type="Password" name="password" id="Pass" placeholder="Password">
+            <br><br>
+            <input type="submit" name="log" id="log" value="Log In">
+            <br><br><br>
+        </form>
+        <form action="/register" method="GET" style="margin-left: 30px">
+            <button type="submit" id="register">Register</button>
+        </form>
+    </div>
 </body>
 </html>
