@@ -55,6 +55,10 @@
           </tr>
         <% } %>
 
+        <% if (messages.stockError) { %>
+          <script>alert("<%= messages.stockError %>");</script>
+        <% } %>
+
 <!--total-->
 
 <tr>
@@ -75,7 +79,9 @@
       <div class="cart-info">
       <img src="shopping-cart.jpg">
       </div>
-      <a href="payment.html"> Go to payment!</a>
+      <form action="/checkout" method="POST">
+        <input type="submit" class="cart-button" value="Proceed to Checkout">
+      </form>
     </td>
     <td>
       <p><%= weight %> lb</p>
@@ -94,5 +100,8 @@
     item.getElementsByClassName('hideOnEdit')[1].style.display = 'none';
     item.getElementsByClassName('showOnEdit')[0].style.display = 'inline';
     item.getElementsByClassName('showOnEdit')[1].style.display = 'inline';
+  }
+  function stockError(message) {
+    alert(message);
   }
 </script>

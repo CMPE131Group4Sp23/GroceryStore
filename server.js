@@ -243,6 +243,109 @@ app.post('/cart/clear', checkAuthenticated, (req, res) => {
     res.redirect('/cart');
 });
 
+app.get('/checkout', checkAuthenticated, (req, res) => {
+    if (!req.cookies.transactionid)
+    {
+        res.redirect('/');
+        return;
+    }
+    connection.query('SELECT * FROM Transaction WHERE id = ?',[req.cookies.transactionid], function(error, results) {
+        if (results.length == 0)
+        {
+            res.redirect('/');
+            return;
+        }
+        else
+        {
+            res.render('payment.ejs');
+        }
+    })
+})
+
+app.post('/checkout', checkAuthenticated, (req, res) => {
+    userCart = JSON.parse(req.cookies.cart);
+    if (userCart.length == 0)
+    {
+        req.flash('stockError', 'There are no items in your cart.');
+        res.redirect('/cart');
+        return;
+    }
+    let query = "SELECT * FROM Product WHERE Product_ID = 0 ";
+    for (var i = 0; i < userCart.length; i++)
+    {
+        query = query + "OR Product_ID = " + connection.escape(userCart[i].id) + " ";
+    }
+    connection.query(query, function(error, results) {
+        userCart.sort((a, b) => {
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            else return 0;
+        });
+        results.sort((a, b) => {
+            if (a.Product_ID < b.Product_ID) return -1;
+            if (a.Product_ID > b.Product_ID) return 1;
+            else return 0;
+        })
+        for (i = 0; i < userCart.length; i++)
+        {
+            if (userCart[i].id != results[i].Product_ID)
+            {
+                req.flash('stockError', "There was an error processing your cart. Please try again later.");
+                res.redirect('/cart');
+                return;
+            }
+            if (results[i].Stock == 0)
+            {
+                req.flash('stockError', "Sorry, " + results[i].Prod_Name + " is out of stock.");
+                res.redirect('/cart');
+                return;
+            }
+            if (userCart[i].quantity > results[i].Stock)
+            {
+                req.flash('stockError', results[i].Prod_Name + " has limited stock. Reduce your quantity to " + results[i].Stock + " or fewer.");
+                res.redirect('/cart');
+                return;
+            }
+        } // Past this point, the cart is valid and all items are in stock
+
+
+
+        transactionID = uuidv4();
+        res.cookie('transactionid', transactionID);
+        connection.query("INSERT INTO Transaction (id, completed, cart) VALUES (?, ?, ?)",[transactionID, 0, JSON.stringify(userCart)]);
+        for (i = 0; i < userCart.length; i++)
+        {
+            connection.query("UPDATE Product SET Stock = ? WHERE Product_ID = ?",[results[i].Stock - userCart[i].quantity, results[i].Product_ID]);
+        }
+        res.clearCookie('cart');
+        res.cookie('cart', JSON.stringify([]));
+
+        res.redirect('/checkout');
+    });
+})
+
+app.get('/submitpayment', checkAuthenticated, (req, res) => {
+    if (!req.cookies.transactionid)
+    {
+        req.flash('stockError', 'There was an error processing your transaction. Please try again.');
+        res.redirect('/');
+        return;
+    }
+    connection.query('SELECT * FROM Transaction WHERE id = ?',[req.cookies.transactionid], function(error, results) {
+        if (results.length == 0 || results[0].completed == 1)
+        {
+            req.flash('stockError', 'There was an error processing your transaction. Please try again.');
+            res.redirect('/');
+            return;
+        }
+        else
+        {
+            connection.query('UPDATE Transaction SET completed = 1 WHERE id = ?',[req.cookies.transactionid]);
+            res.render('ordercomplete.ejs');
+        }
+    })
+})
+
 
 
 function checkAuthenticated(req, res, next)
@@ -264,6 +367,5 @@ function checkNotAuthenticated(req, res, next)
 
     next();
 }
-
 
 app.listen(3000);
