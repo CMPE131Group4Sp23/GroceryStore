@@ -18,7 +18,7 @@ table{
 
 .cart-info{
     display: flex;
-    flex-wrap: wrap;}
+  }
 th{
   text-align: left;
   padding: 5px;
@@ -45,6 +45,9 @@ td img{
   border: none;
   border-radius: 17px;
   color: #ff523b;
+}
+.cart-button:hover {
+  background-color:rgb(235, 235, 235);
 }
 
 form {

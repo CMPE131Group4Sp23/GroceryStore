@@ -55,6 +55,19 @@
           </tr>
         <% } %>
 
+        <% if (weightFee > 0) { %>
+          <tr>
+            <td>
+              <div class="cart-info">
+              <div>
+                <p style="margin: 0px 0px 0px 90px">Weight Fee</p> <!--Item-->
+              </div>
+              </div>
+            </td>
+            <td>$5.00</td>
+          </tr>
+        <% } %>
+
         <% if (messages.stockError) { %>
           <script>alert("<%= messages.stockError %>");</script>
         <% } %>
@@ -62,7 +75,7 @@
 <!--total-->
 
 <tr>
-    <th>Weight fee</th>
+    <th></th>
     <th>Subtotal</th>
     <th>     </th>
     <th>Total Weight</th>
@@ -70,7 +83,6 @@
 
 <tr>
     <td>
-      <p>$<%= weightFee %></p>
     </td>
     <td>
       <p>$<%= price %></p>
