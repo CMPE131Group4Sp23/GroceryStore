@@ -89,7 +89,7 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
         res.redirect('/register');
         return;
     }
-    connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], function(error, results) {
+    connection.query('SELECT * FROM users WHERE email = ?',[req.body.email], async function(error, results) {
         if (error) throw error;
         if (results.length > 0)
         {
@@ -97,20 +97,19 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
             res.redirect('/register');
             return;
         }
+        try
+        {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+            connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[uuidv4(), req.body.email, hashedPassword,
+            req.body.firstname, req.body.lastname, req.body.mobilenum]);
+            res.redirect('/login');
+        }
+        catch(e)
+        {
+            console.log(e);
+            res.redirect('/register');
+        }
     });
-
-    try
-    {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[uuidv4(), req.body.email, hashedPassword,
-        req.body.firstname, req.body.lastname, req.body.mobilenum]);
-        res.redirect('/login');
-    }
-    catch(e)
-    {
-        console.log(e);
-        res.redirect('/register');
-    }
 })
 
 app.get('/logout', (req, res) => {

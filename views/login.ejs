@@ -10,10 +10,9 @@
         <% if (messages.error) { %>
             <p style="color:red"><%= messages.error %></p>
         <% } %>
-        <form id="login" method="POST" action="/login" style="margin-left: 30px">
+        <form id="login" method="POST" action="/login">
             <label><b>Email</b></label><br>
-            
-            <input type="text" name="email" id="Uname" placeholder="Username">
+            <input type="text" name="email" id="Uname" placeholder="Email">
             <br><br>
             <label><b>Password
             </b>
@@ -21,10 +20,8 @@
             <input type="Password" name="password" id="Pass" placeholder="Password">
             <br><br>
             <input type="submit" name="log" id="log" value="Log In">
-            <br><br><br>
-        </form>
-        <form action="/register" method="GET" style="margin-left: 30px">
-            <button type="submit" id="register">Register</button>
+            <br>
+            <a href="/register" id="register"><p>Don't have an account? Register here.</p></a>
         </form>
     </div>
 </body>

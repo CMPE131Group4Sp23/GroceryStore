@@ -2,31 +2,32 @@ body
 {
     margin: 0;
     padding: 0;
-    background-image:url("vegetables.jpg");
     font-family: 'Arial';
+    background: rgb(217, 255, 212);
 }
 .login{
-        width: 382px;
+        width: 300px;
         overflow: hidden;
         margin: auto;
-        padding: 30px 80px 30px 80px;
-        background: #88e782;
+        padding: 30px;
         border-radius: 15px ;
+        background-color: rgb(255, 255, 255);
 }
 h1{
     text-align: center;
-    color: white;
-    padding: 50px;
+    color: rgb(0, 0, 0);
+    padding: 30px;
 }
 label{
-    color: #08ffd1;
+    color: rgb(196, 196, 196);
     font-size: 17px;
 }
 #Uname{
     width: 300px;
     height: 30px;
-    border: none;
     border-radius: 3px;
+    border: none;
+    background-color:rgb(217, 255, 212);
     padding-left: 8px;
 }
 #Pass{
@@ -35,6 +36,7 @@ label{
     border: none;
     border-radius: 3px;
     padding-left: 8px;
+    background-color:rgb(217, 255, 212);
 
 }
 #log{
@@ -44,15 +46,30 @@ label{
     border-radius: 17px;
     padding-left: 7px;
     color: black;
+    background-color:rgb(217, 255, 212);
 }
+#log:hover {
+    background-color:rgb(202, 237, 197);
+}
+
 #register{
-    width: 300px;
+    color: rgb(196, 196, 196);
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+}
+#register:hover {
+    text-decoration: underline;
+}
+.name {
+    width: 140px;
     height: 30px;
     border: none;
-    border-radius: 17px;
-    padding-left: 7px;
-    color: black;
+    border-radius: 3px;
+    padding-left: 8px;
+    background-color:rgb(217, 255, 212);
 }
+
 span{
     color: white;
     font-size: 17px;
