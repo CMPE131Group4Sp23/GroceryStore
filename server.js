@@ -345,6 +345,10 @@ app.get('/submitpayment', checkAuthenticated, (req, res) => {
     })
 })
 
+app.get('/about', (req, res) => {
+    res.render('about.ejs');
+})
+
 
 
 function checkAuthenticated(req, res, next)

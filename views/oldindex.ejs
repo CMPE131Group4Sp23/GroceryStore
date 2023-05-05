@@ -1,0 +1,20 @@
+<h1>Hi, <%= name %></h1>
+<a href="/cart"><button type="button">Cart</button></a>
+<form action="/logout", method="POST">
+    <button type="submit">Log Out</button>
+</form>
+<iframe name="dummyFrame" width=0 height="0" border="0" style="display: none;"></iframe>
+
+
+<% for (var i = 0; i < productList.length; i++) { %>
+    <% for (var j = 0; j < productList[i].length; j++) { %>
+        <form action="/cart/additem" method="post" target="dummyFrame">
+            <input type="hidden" name="productid" value="<%= productList[i][j].Product_ID %>">
+            <label for="submit"><%= productList[i][j].Prod_Name %></label>
+            <input type="submit" id="submit" value="Add to Cart">
+            <input type="number" id="quantity" name="quantity" min="1" max="20" value="1">
+        </form>
+    <% } %>
+        NEW LINE
+        <br>
+<% } %>

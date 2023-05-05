@@ -18,12 +18,13 @@ table{
 
 .cart-info{
     display: flex;
+    width: 400px;
   }
 th{
   text-align: left;
   padding: 5px;
-  color: #fff;
-  background: #ff523b;
+  color: rgb(72, 72, 72);
+  background: rgb(217, 255, 212);
   font-weight: normal;}
 
   td{
@@ -44,10 +45,11 @@ td img{
   padding: 5px 10px 5px 10px;
   border: none;
   border-radius: 17px;
-  color: #ff523b;
+  color: rgb(72, 72, 72);
+  background-color:rgb(217, 255, 212);
 }
 .cart-button:hover {
-  background-color:rgb(235, 235, 235);
+  background-color:rgb(202, 237, 197);
 }
 
 form {

@@ -1,0 +1,131 @@
+/* screen - large */
+
+.large {
+  align-items: flex-end;
+  background-color: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 49px;
+  min-height: 1080px;
+  padding: 42px 48px;
+  width: 1600px;
+}
+
+.large .flex-row-1 {
+  align-items: center;
+  display: flex;
+  margin-top: 8px;
+  min-width: 1502px;
+}
+
+.large .header-copy {
+  align-items: flex-start;
+  display: flex;
+  gap: 49px;
+  min-width: 792px;
+}
+
+.large .cart {
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 38px;
+  margin-left: 476px;
+  min-width: 68px;
+  white-space: nowrap;
+}
+
+.large .flex-col {
+  align-self: center;
+  flex-direction: column;
+  gap: 75px;
+  min-height: 797px;
+  width: 1500px;
+}
+
+.large .banners {
+  align-items: flex-start;
+  display: flex;
+  gap: 40px;
+  height: 400px;
+  min-width: 1500px;
+}
+
+.large .banner {
+  align-items: flex-start;
+  background-color: var(--white);
+  border-radius: 40px;
+  box-shadow: 0px 1px 8px -2px #00000020;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 400px;
+  padding: 2px 6px;
+  width: 730px;
+}
+
+.large .order-your-favorite {
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 44px;
+  margin-left: 24px;
+  margin-top: 28px;
+  white-space: nowrap;
+}
+
+.large .overlap-group {
+  align-self: flex-end;
+  height: 323px;
+  position: relative;
+  width: 694px;
+}
+
+.large .bitmap {
+  height: 323px;
+  left: 166px;
+  position: absolute;
+  top: 0;
+  width: 528px;
+}
+
+.large .product-card-container {
+  align-items: flex-start;
+  display: flex;
+  min-width: 1500px;
+}
+
+.large .flex-row {
+  gap: 2px;
+  height: 239px;
+  min-width: 236px;
+}
+
+.large .product-card-copy {
+  align-items: flex-end;
+  background-color: var(--frostee);
+  border-radius: 39px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: 322px;
+  margin-left: 71px;
+  overflow: hidden;
+  width: 322px;
+}
+
+.large .product-card-copy-2 {
+  align-items: flex-end;
+  background-color: var(--frostee);
+  border-radius: 39px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: 322px;
+  margin-left: 70px;
+  overflow: hidden;
+  width: 322px;
+}
+
+.large .flex {
+  align-items: flex-start;
+  display: flex;
+}
