@@ -1,0 +1,7 @@
+04/23/23 Sunday
+
+- remove unnecessary information from user table
+- make new payment information table?
+- Krishna - edit main page introduction
+- Binh - work on linking login system with master branch, also design logo
+- Sessions to replace product_details_table? 
