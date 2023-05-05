@@ -346,6 +346,9 @@ app.get('/submitpayment', checkAuthenticated, (req, res) => {
     })
 })
 
+app.get('/registration', checkNotAuthenticated, (req, res) => {
+    res.render('registration.ejs');
+})
 
 
 function checkAuthenticated(req, res, next)
