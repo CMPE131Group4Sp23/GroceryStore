@@ -13,10 +13,11 @@ const { v4: uuidv4} = require('uuid');
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
 const connection = mysql.createConnection({
-    host: 'cmpe131-group4-baymart.ceuvuwmxdxqi.us-west-1.rds.amazonaws.com',
-    user: 'admin',
-    password: 'password',
-    database: 'cmpe131_group4_baymart'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
 });
 
 connection.connect(function(err) {
@@ -345,9 +346,10 @@ app.get('/submitpayment', checkAuthenticated, (req, res) => {
     })
 })
 
-app.get('/registration', checkNotAuthenticated, (req, res) => {
-    res.render('registration.ejs');
+app.get('/about', (req, res) => {
+    res.render('about.ejs');
 })
+
 
 
 function checkAuthenticated(req, res, next)

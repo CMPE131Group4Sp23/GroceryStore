@@ -10,7 +10,7 @@ function initialize(passport, connection)
 
                 if (results.length == 0)
                 {
-                    return done(null, false, { message: 'No user with that email' });
+                    return done(null, false, { message: 'Invalid email' });
                 }
 
                 user = results[0];
@@ -20,7 +20,7 @@ function initialize(passport, connection)
                 }
                 else
                 {
-                    return done(null, false, { message: 'Password incorrect'});
+                    return done(null, false, { message: 'Incorrect Password'});
                 }
             }
             catch(e)

@@ -1,0 +1,57 @@
+:root { 
+  --black: #000000;
+  --frostee: #e3f2e6;
+  --fruit-salad: #4e926c;
+  --white: #ffffff;
+ 
+  --font-size-l: 32px;
+  --font-size-m: 28px;
+  --font-size-s: 24px;
+  --font-size-xl: 37px;
+  --font-size-xxl: 40px;
+  --font-size-xxxl: 49px;
+  --font-size-xxxxl: 80px;
+ 
+  --font-family-sfpro-bold: "SFPro-Bold", Helvetica;
+  --font-family-sfpro-compressedsemibold: "SFPro-CompressedSemibold", Helvetica;
+  --font-family-sfpro-semibold: "SFPro-Semibold", Helvetica;
+}
+.sfpro-semi-bold-black-28px {
+  color: var(--black);
+  font-family: var(--font-family-sfpro-semibold);
+  font-size: var(--font-size-m);
+  font-style: normal;
+  font-weight: 590;
+}
+
+.sfpro-bold-fruit-salad-32px {
+  color: var(--fruit-salad);
+  font-family: var(--font-family-sfpro-bold);
+  font-size: var(--font-size-l);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.sfpro-bold-fruit-salad-40px {
+  color: var(--fruit-salad);
+  font-family: var(--font-family-sfpro-bold);
+  font-size: var(--font-size-xxl);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.sfpro-bold-black-37px {
+  color: var(--black);
+  font-family: var(--font-family-sfpro-bold);
+  font-size: var(--font-size-xl);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.sfpro-bold-fruit-salad-24px {
+  color: var(--fruit-salad);
+  font-family: var(--font-family-sfpro-bold);
+  font-size: var(--font-size-s);
+  font-style: normal;
+  font-weight: 700;
+}
