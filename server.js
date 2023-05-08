@@ -10,14 +10,39 @@ const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
 
+import {
+    SecretsManagerClient,
+    GetSecretValueCommand,
+  } from "@aws-sdk/client-secrets-manager";
+  
+const secret_name = "SessionInfo";
+  
+const client = new SecretsManagerClient({
+region: "us-west-1",
+});
+
+try {
+    response = await client.send(
+        new GetSecretValueCommand({
+            SecretId: secret_name,
+            VersionStage: "AWSCURRENT"
+        })
+    );
+} catch (error) {
+    throw error;
+}
+
+
+
+
 dotenv.config({ path: './.env'});                       // Sets path of environment variables
 
 const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
+    host: response.SESSION_SECRET,
+    user: response.DB_HOST,
+    password: response.DB_USER,
+    database: response.DB_PASSWORD,
+    port: response.DB_PORT
 });
 
 connection.connect(function(err) {
