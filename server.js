@@ -9,40 +9,15 @@ const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
-
-import {
-    SecretsManagerClient,
-    GetSecretValueCommand,
-  } from "@aws-sdk/client-secrets-manager";
-  
-const secret_name = "SessionInfo";
-  
-const client = new SecretsManagerClient({
-region: "us-west-1",
-});
-
-try {
-    response = await client.send(
-        new GetSecretValueCommand({
-            SecretId: secret_name,
-            VersionStage: "AWSCURRENT"
-        })
-    );
-} catch (error) {
-    throw error;
-}
-
-
-
-
-dotenv.config({ path: './.env'});                       // Sets path of environment variables
+const fs = require("fs").promises;
+const retrieveSecrets = require("./retrieveSecrets");
 
 const connection = mysql.createConnection({
-    host: response.SESSION_SECRET,
-    user: response.DB_HOST,
-    password: response.DB_USER,
-    database: response.DB_PASSWORD,
-    port: response.DB_PORT
+    host: process.env.SESSION_SECRET,
+    user: process.env.DB_HOST,
+    password: process.env.DB_USER,
+    database: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT
 });
 
 connection.connect(function(err) {
@@ -397,4 +372,14 @@ function checkNotAuthenticated(req, res, next)
     next();
 }
 
-app.listen(80);
+app.listen(80, async() => {
+    try {
+        const secretsString = await retrieveSecrets();
+        await FileSystem.writeFile(".env", secretsString);
+        dotenv.config();
+        console.log("Server running on port 80");
+    } catch (error) {
+        console.log("Error in setting up environment variables");
+        process.exit(-1);
+    }
+});
