@@ -10,7 +10,6 @@ const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
 const fs = require("fs").promises;
-const retrieveSecrets = require("./retrieveSecrets");
 
 const connection = mysql.createConnection({
     host: process.env.SESSION_SECRET,
@@ -19,6 +18,8 @@ const connection = mysql.createConnection({
     database: process.env.DB_PASSWORD,
     port: process.env.DB_PORT
 });
+
+dotenv.config();
 
 connection.connect(function(err) {
     if (err) throw err;
