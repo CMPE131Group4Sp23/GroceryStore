@@ -372,15 +372,4 @@ function checkNotAuthenticated(req, res, next)
     next();
 }
 
-app.listen(80, async() => {
-    try {
-        const secretsString = await retrieveSecrets();
-        await FileSystem.writeFile(".env", secretsString);
-        dotenv.config();
-        console.log(process.env);
-        console.log("Server running on port 80");
-    } catch (error) {
-        console.log("Error in setting up environment variables");
-        process.exit(-1);
-    }
-});
+app.listen(80);
