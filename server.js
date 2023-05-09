@@ -11,6 +11,8 @@ const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
 const fs = require("fs").promises;
 
+dotenv.config();
+
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -19,7 +21,6 @@ const connection = mysql.createConnection({
     port: process.env.DB_PORT
 });
 
-dotenv.config();
 
 connection.connect(function(err) {
     if (err) throw err;
