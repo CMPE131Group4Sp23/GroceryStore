@@ -54,8 +54,8 @@
                       <div class="apple sfpro-bold-fruit-salad-40px"><%= productList[i][j].Prod_Name %></div>
                       <img
                         class="apple-image"
-                        src="apple.jpg"
-                        alt="AppleImage"
+                        src="<%= productList[i][j].Image_Path %>"
+                        alt="Product Image"
                       />
                     </div>
                     <div class="overlap-group-1"><div class="price sfpro-bold-fruit-salad-32px">$<%= (productList[i][j].Price/100).toFixed(2) %></div></div>
