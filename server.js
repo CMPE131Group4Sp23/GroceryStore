@@ -51,7 +51,7 @@ var certificate = fs.readFileSync('server.cert');
 var credentials = {key: privateKey, cert: certificate};
 
 http.createServer(app).listen(8080);
-httpsServer = https.createServer(credentials, app).listen(8443);
+https.createServer(credentials, app).listen(8443);
 
 
 app.get('/', checkAuthenticated, (req,res) => {
