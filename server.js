@@ -9,7 +9,7 @@ const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
-const fs = require("fs").promises;
+const fs = require("fs");
 const http = require('http');
 const https = require('https');
 
@@ -45,6 +45,13 @@ app.use(express.static('files'));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
+
+var privateKey = fs.readFileSync('server.key');
+var certificate = fs.readFileSync('server.cert');
+var credentials = {key: privateKey, cert: certificate};
+
+http.createServer(app).listen(8080);
+httpsServer = https.createServer(credentials, app).listen(8443);
 
 
 app.get('/', checkAuthenticated, (req,res) => {
