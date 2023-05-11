@@ -44,9 +44,17 @@ app.use(express.static('files'));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
-app.use(hsts({
+
+const hstsMiddleware = hsts({
     maxAge: 15552000
-}))
+})
+app.use((req, res, next) => {
+    if (req.secure) {
+        hstsMiddleware(req, res, next);
+    } else {
+        next();
+    }
+});
 
 app.get('/', checkAuthenticated, (req,res) => {
     if (!req.cookies.cart)
