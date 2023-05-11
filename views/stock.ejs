@@ -1,0 +1,82 @@
+<html>
+<head>
+    <title>Stock Editor</title>
+    <link rel="stylesheet" type="text/css" href="styleshoppingcart.css">
+</head>
+
+<body>
+<h1>Stock Editor</h1><br>
+<a href='/'><button class="cart-button">Home</button></a>
+<div class="small-container  cart-page">
+  <table>
+      <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Weight</th>
+      </tr>
+
+<!--products-->
+      <% for (var i = 0; i < cart.length; i++) { %>
+        <tr>
+            <td>
+              <div class="cart-info">
+                <img src="<%= cart[i].Image_Path %>"> <!--picture-->
+              <div>
+                <p><%= cart[i].Prod_Name %></p> <!--Item-->
+              </div>
+              </div>
+            </td>
+
+            <td>$<%= (cart[i].Price /100).toFixed(2) %></td>  <!--price-->
+
+            <td id="<%= cart[i].Product_ID %>"><!--Quantity-->
+              <p class="hideOnEdit" style="display: inline"><%= cart[i].Stock %></p>
+              <input type="submit" id="editButton" class="cart-button hideOnEdit" style="margin-left: 15px;" value="Edit" onclick="showQuantityBox(<%= cart[i].Product_ID %>);">
+              <form action="/stock" method="POST">
+                <input type="hidden" name="productid" value="<%= cart[i].Product_ID %>">
+                <input type="number" class="showOnEdit" id="quantityBox" value="<%= cart[i].Stock %>" name="quantity" min="0">
+                <input type="submit" value="Save" class="cart-button showOnEdit" style="display: none;">
+              </form>
+            </td>
+
+            <td>
+              <p><%= cart[i].Weight %> lb</p>
+            </td>
+        </tr>
+      <% } %>
+      
+        <% if (messages.emptyCart) { %>
+          <tr>
+            <td><%= messages.emptyCart %></td>
+          </tr>
+        <% } %>
+
+        <% if (messages.stockError) { %>
+          <script>alert("<%= messages.stockError %>");</script>
+        <% } %>
+
+<!--total-->
+
+<tr>
+    <th></th>
+    <th>Subtotal</th>
+    <th>     </th>
+    <th>Total Weight</th>
+</tr>
+  </table>
+
+</div>
+</body>
+<script>
+  function showQuantityBox(id) {
+    const item = document.getElementById(id);
+    item.getElementsByClassName('hideOnEdit')[0].style.display = 'none';
+    item.getElementsByClassName('hideOnEdit')[1].style.display = 'none';
+    item.getElementsByClassName('showOnEdit')[0].style.display = 'inline';
+    item.getElementsByClassName('showOnEdit')[1].style.display = 'inline';
+  }
+  function stockError(message) {
+    alert(message);
+  }
+</script>

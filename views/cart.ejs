@@ -1,0 +1,120 @@
+<html>
+<head>
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" type="text/css" href="styleshoppingcart.css">
+</head>
+
+<body>
+<h1>BayMart Shopping Cart</h1><br>
+<a href='/'><button class="cart-button">Home</button></a>
+<div class="small-container  cart-page">
+  <table>
+      <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Weight</th>
+      </tr>
+
+<!--products-->
+      <% for (var i = 0; i < cart.length; i++) { %>
+        <tr>
+            <td>
+              <div class="cart-info">
+                <img src="<%= cart[i].Image_Path %>"> <!--picture-->
+              <div>
+                <p><%= cart[i].Prod_Name %></p> <!--Item-->
+                <form action="/cart/removeitem" method="POST">
+                  <input type="hidden" name="id" value="<%= cart[i].Product_ID %>">
+                  <input type="submit" class="cart-button" value="Remove">
+                </form>
+              </div>
+              </div>
+            </td>
+
+            <td>$<%= (cart[i].Price /100).toFixed(2) %></td>  <!--price-->
+
+            <td id="<%= cart[i].Product_ID %>"><!--Quantity-->
+              <p class="hideOnEdit" style="display: inline"><%= cart[i].quantity %></p>
+              <input type="submit" id="editButton" class="cart-button hideOnEdit" style="margin-left: 15px;" value="Edit" onclick="showQuantityBox(<%= cart[i].Product_ID %>);">
+              <form action="/cart/editquantity" method="POST">
+                <input type="hidden" name="id" value="<%= cart[i].Product_ID %>">
+                <input type="number" class="showOnEdit" id="quantityBox" value="<%= cart[i].quantity %>" name="newquantity" min="1" max="20">
+                <input type="submit" value="Save" class="cart-button showOnEdit" style="display: none;">
+              </form>
+            </td>
+
+            <td>
+              <p><%= (cart[i].Weight * cart[i].quantity).toFixed(2) %> lb</p>
+            </td>
+        </tr>
+      <% } %>
+      
+        <% if (messages.emptyCart) { %>
+          <tr>
+            <td><%= messages.emptyCart %></td>
+          </tr>
+        <% } %>
+
+        <% if (weightFee > 0) { %>
+          <tr>
+            <td>
+              <div class="cart-info">
+              <div>
+                <p style="margin: 0px 0px 0px 90px">Weight Fee</p> <!--Item-->
+              </div>
+              </div>
+            </td>
+            <td>$5.00</td>
+          </tr>
+        <% } %>
+
+        <% if (messages.stockError) { %>
+          <script>alert("<%= messages.stockError %>");</script>
+        <% } %>
+
+<!--total-->
+
+<tr>
+    <th></th>
+    <th>Subtotal</th>
+    <th>     </th>
+    <th>Total Weight</th>
+</tr>
+
+<tr>
+    <td>
+    </td>
+    <td>
+      <p>$<%= price %></p>
+    </td>
+    <td>
+      <div class="cart-info">
+      <img src="shopping-cart.jpg">
+      </div>
+      <form action="/checkout" method="POST">
+        <input type="submit" class="cart-button" value="Proceed to Checkout">
+      </form>
+    </td>
+    <td>
+      <p><%= weight %> lb</p>
+    </td>
+</tr>
+
+
+  </table>
+
+</div>
+</body>
+<script>
+  function showQuantityBox(id) {
+    const item = document.getElementById(id);
+    item.getElementsByClassName('hideOnEdit')[0].style.display = 'none';
+    item.getElementsByClassName('hideOnEdit')[1].style.display = 'none';
+    item.getElementsByClassName('showOnEdit')[0].style.display = 'inline';
+    item.getElementsByClassName('showOnEdit')[1].style.display = 'inline';
+  }
+  function stockError(message) {
+    alert(message);
+  }
+</script>

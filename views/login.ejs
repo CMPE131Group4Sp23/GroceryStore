@@ -1,16 +1,28 @@
-<h1>Login</h1>
-<% if (messages.error) { %>
-    <%= messages.error %>
-<% } %>
-<form action="/login", method="POST">
-    <div>
-        <label for="email">Email</label>
-        <input type="text" id="email", name="email" required>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <h1>BayMart Customer Log in</h1><br>
+    <div class="login">
+        <% if (messages.error) { %>
+            <p style="color:red"><%= messages.error %></p>
+        <% } %>
+        <form id="login" method="POST" action="/login">
+            <label><b>Email</b></label><br>
+            <input type="text" name="email" id="Uname" placeholder="Email">
+            <br><br>
+            <label><b>Password
+            </b>
+            </label>
+            <input type="Password" name="password" id="Pass" placeholder="Password">
+            <br><br>
+            <input type="submit" name="log" id="log" value="Log In">
+            <br>
+            <a href="/register" id="register"><p>Don't have an account? Register here.</p></a>
+        </form>
     </div>
-    <div>
-        <label for="password">Password</label>
-        <input type="text" id="password", name="password" required>
-    </div>
-    <button type="submit">Login</button>
-</form>
-<a href="/register">Register</a>
+</body>
+</html>
