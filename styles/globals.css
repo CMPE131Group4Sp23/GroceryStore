@@ -125,6 +125,7 @@
   margin-left: 2.0px;
   min-width: 111px;
   white-space: nowrap;
+  font-size: 20px;
 }
 
 .apple-image {
@@ -211,4 +212,14 @@
 
 .product-card:not(:nth-child(4n)) {
   margin-bottom: 20px;
+}
+
+.footer { 
+  left: 10px;  
+  bottom: 5px;  
+  right: 10px;   
+  width: 95%;  
+  background-color: var(--frostee); 
+  color: white;  
+  text-align: center;
 }

@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="large.css" />
     <link rel="stylesheet" type="text/css" href="styleguide.css" />
     <link rel="stylesheet" type="text/css" href="globals.css" />
+    <title>Baymart</title>
   </head>
   <body style="margin: 0; background: #ffffff">
     <input type="hidden" id="anPageName" name="page" value="large" />
@@ -60,6 +61,7 @@
                     </div>
                     <div class="overlap-group-1"><div class="price sfpro-bold-fruit-salad-32px">$<%= (productList[i][j].Price/100).toFixed(2) %></div></div>
                   </div>
+                  <iframe name="dummyFrame" width=0 height="0" style="display: none;"></iframe>
                   <form action="/cart/additem" method="post" target="dummyFrame" class="add-to-cart sfpro-semi-bold-black-28px">
                     <input type="hidden" name="productid" value="<%= productList[i][j].Product_ID %>">
                     <input type="submit" class="add-to-cart-1" value="Add to cart">
@@ -75,6 +77,9 @@
             </div>
         </div>
       </div>
+    </div>
+    <div class="footer">
+      <a href="/about"><div class="apple sfpro-bold-fruit-salad-40px">About Us</div></a>
     </div>
   </body>
 </html>

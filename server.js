@@ -103,8 +103,8 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
         try
         {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum) VALUES (?,?,?,?,?,?)",[uuidv4(), req.body.email, hashedPassword,
-            req.body.firstname, req.body.lastname, req.body.mobilenum]);
+            connection.query("INSERT INTO users (userid, email, password, firstname, lastname, mobilenum, Is_Admin) VALUES (?,?,?,?,?,?,?)",[uuidv4(), req.body.email, hashedPassword,
+            req.body.firstname, req.body.lastname, req.body.mobilenum, 0]);
             res.redirect('/login');
         }
         catch(e)
@@ -350,6 +350,52 @@ app.get('/submitpayment', checkAuthenticated, (req, res) => {
 
 app.get('/about', (req, res) => {
     res.render('about.ejs');
+})
+
+app.get('/stock', checkAuthenticated, (req, res) => {
+    connection.query('SELECT * FROM users WHERE userid = ?', [req.user.userid], function(error, results) {
+        if (error)
+        {
+            throw error;
+        }
+        if (!results)
+        {
+            res.redirect('/');
+        }
+        else if (results[0].Is_Admin == 1)
+        {
+            connection.query('SELECT * FROM Product', function(error, results) {
+                if (error) throw error;
+                productList = [];
+                for (i = 0; i < results.length; i++)
+                {
+                    productList.push(results[i]);
+                }
+                res.render('stock.ejs', {cart : productList});
+            });
+        }
+        else
+        {
+            res.redirect('/');
+        }
+    });
+});
+app.post('/stock', checkAuthenticated, (req, res) => {
+    connection.query('SELECT * FROM users WHERE userid = ?', [req.user.userid], function(error, results) {
+        if (error)
+        {
+            throw error;
+        }
+        if (!results)
+        {
+            res.redirect('/');
+        }
+        else if (results[0].Is_Admin == 1)
+        {
+            connection.query('UPDATE Product SET Stock = ? WHERE Product_ID = ?', [req.body.quantity, req.body.productid]);
+            res.redirect('/stock');
+        }
+    });
 })
 
 
