@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
 const fs = require("fs").promises;
+const hsts = require('hsts');
 
 dotenv.config();
 
@@ -43,6 +44,9 @@ app.use(express.static('files'));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
+app.use(hsts({
+    maxAge: 15552000
+}))
 
 app.get('/', checkAuthenticated, (req,res) => {
     if (!req.cookies.cart)
@@ -420,4 +424,4 @@ function checkNotAuthenticated(req, res, next)
     next();
 }
 
-app.listen(3100);
+app.listen(80);
