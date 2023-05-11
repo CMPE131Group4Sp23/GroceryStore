@@ -9,7 +9,7 @@ const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
 const emailValidator = require('email-validator');
 const { v4: uuidv4} = require('uuid');
-const fs = require("fs").promises;
+const hsts = require('hsts');
 
 dotenv.config();
 
@@ -44,7 +44,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 
-app.get('/', checkAuthenticated, (req,res) => {
+
+app.get('/', checkAuthenticated, checkHSTS, (req,res) => {
     if (!req.cookies.cart)
     {
         res.cookie('cart', JSON.stringify([]));
@@ -63,21 +64,21 @@ app.get('/', checkAuthenticated, (req,res) => {
     });
 })
 
-app.get('/login', checkNotAuthenticated, (req,res) => {
+app.get('/login', checkNotAuthenticated, checkHSTS, (req,res) => {
     res.render('login.ejs');
 })
 
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+app.post('/login', checkNotAuthenticated, checkHSTS, passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
 }));
 
-app.get('/register', checkNotAuthenticated, (req,res) => {
+app.get('/register', checkNotAuthenticated, checkHSTS, (req,res) => {
     res.render('register.ejs');
 })
 
-app.post('/register', checkNotAuthenticated, async (req,res) => {
+app.post('/register', checkNotAuthenticated, checkHSTS, async (req,res) => {
     if (!emailValidator.validate(req.body.email))
     {
         req.flash('error', 'Invalid Email Address');
@@ -115,10 +116,10 @@ app.post('/register', checkNotAuthenticated, async (req,res) => {
     });
 })
 
-app.get('/logout', (req, res) => {
+app.get('/logout', checkHSTS, (req, res) => {
     res.redirect('/');
 })
-app.post('/logout', checkAuthenticated, (req,res) =>{
+app.post('/logout', checkAuthenticated, checkHSTS, (req,res) =>{
     req.logout((err) => {
         if (err)
         {
@@ -129,7 +130,7 @@ app.post('/logout', checkAuthenticated, (req,res) =>{
     res.redirect('/login');
 });
 
-app.get('/cart', checkAuthenticated, (req, res) => {
+app.get('/cart', checkAuthenticated, checkHSTS, (req, res) => {
     userCart = JSON.parse(req.cookies.cart);
     let query = "SELECT * FROM Product WHERE Product_ID = 0 ";
     for (var i = 0; i < userCart.length; i++)
@@ -165,7 +166,7 @@ app.get('/cart', checkAuthenticated, (req, res) => {
     });
 })
 
-app.post('/cart', checkAuthenticated, (req, res) => {
+app.post('/cart', checkAuthenticated, checkHSTS, (req, res) => {
     userCart = JSON.parse(req.cookies.cart);
     let query = "SELECT * FROM Product WHERE Product_ID = 0 ";
     for (var i = 0; i < userCart.length; i++)
@@ -193,7 +194,7 @@ app.post('/cart', checkAuthenticated, (req, res) => {
     });
 })
 
-app.post('/cart/editquantity', checkAuthenticated, (req, res) => {
+app.post('/cart/editquantity', checkAuthenticated, checkHSTS, (req, res) => {
     userCart = JSON.parse(req.cookies.cart);
     cartItem = userCart.find(product => product.id === req.body.id);
     if (cartItem)
@@ -205,7 +206,7 @@ app.post('/cart/editquantity', checkAuthenticated, (req, res) => {
     res.redirect('/cart');
 })
 
-app.post('/cart/removeitem', checkAuthenticated, (req,res) => {
+app.post('/cart/removeitem', checkAuthenticated, checkHSTS, (req,res) => {
     userCart = JSON.parse(req.cookies.cart);
     var index = userCart.findIndex(item => item.id === req.body.id);
     if (index != -1) userCart.splice(index, 1);
@@ -214,7 +215,7 @@ app.post('/cart/removeitem', checkAuthenticated, (req,res) => {
     res.redirect('/cart');
 })
 
-app.post('/cart/additem', checkAuthenticated, (req, res) => {
+app.post('/cart/additem', checkAuthenticated, checkHSTS, (req, res) => {
     if (!req.cookies.cart) res.redirect('/');
 
     if (req.body.productid)
@@ -239,13 +240,13 @@ app.post('/cart/additem', checkAuthenticated, (req, res) => {
     }
 })
 
-app.post('/cart/clear', checkAuthenticated, (req, res) => {
+app.post('/cart/clear', checkAuthenticated, checkHSTS, (req, res) => {
     res.clearCookie('cart');
     res.cookie('cart',JSON.stringify([]));
     res.redirect('/cart');
 });
 
-app.get('/checkout', checkAuthenticated, (req, res) => {
+app.get('/checkout', checkAuthenticated, checkHSTS, (req, res) => {
     if (!req.cookies.transactionid)
     {
         res.redirect('/');
@@ -264,7 +265,7 @@ app.get('/checkout', checkAuthenticated, (req, res) => {
     })
 })
 
-app.post('/checkout', checkAuthenticated, (req, res) => {
+app.post('/checkout', checkAuthenticated, checkHSTS, (req, res) => {
     userCart = JSON.parse(req.cookies.cart);
     if (userCart.length == 0)
     {
@@ -326,7 +327,7 @@ app.post('/checkout', checkAuthenticated, (req, res) => {
     });
 })
 
-app.get('/submitpayment', checkAuthenticated, (req, res) => {
+app.get('/submitpayment', checkAuthenticated, checkHSTS, (req, res) => {
     if (!req.cookies.transactionid)
     {
         req.flash('stockError', 'There was an error processing your transaction. Please try again.');
@@ -348,11 +349,11 @@ app.get('/submitpayment', checkAuthenticated, (req, res) => {
     })
 })
 
-app.get('/about', (req, res) => {
+app.get('/about', checkHSTS, (req, res) => {
     res.render('about.ejs');
 })
 
-app.get('/stock', checkAuthenticated, (req, res) => {
+app.get('/stock', checkAuthenticated, checkHSTS, (req, res) => {
     connection.query('SELECT * FROM users WHERE userid = ?', [req.user.userid], function(error, results) {
         if (error)
         {
@@ -380,7 +381,7 @@ app.get('/stock', checkAuthenticated, (req, res) => {
         }
     });
 });
-app.post('/stock', checkAuthenticated, (req, res) => {
+app.post('/stock', checkAuthenticated, checkHSTS, (req, res) => {
     connection.query('SELECT * FROM users WHERE userid = ?', [req.user.userid], function(error, results) {
         if (error)
         {
@@ -417,6 +418,13 @@ function checkNotAuthenticated(req, res, next)
         return res.redirect('/');
     }
 
+    next();
+}
+
+function checkHSTS(req, res, next) {
+    if (req.secure) {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
     next();
 }
 
